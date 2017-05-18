@@ -31,7 +31,7 @@
                 (
                     command === 'eval' &&
                     (message.member.hasPermission('ADMINISTRATOR') ||
-                        msg.channel.send(':x: You do not have permission to do that!' && false)
+                        message.channel.send(':x: You do not have permission to do that!') && false
                     ) &&
                     (args.length > 0 ||
                         message.channel.send(':x: Please provide some code to eval!') && false
