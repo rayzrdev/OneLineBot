@@ -1,0 +1,16 @@
+{
+  "name": "oneline-bot",
+  "version": "1.0.0",
+  "description": "A Discord bot in one very long line of code",
+  "main": "index.js",
+  "repository": "https://github.com/Rayzr522/OneLineBot",
+  "author": "Rayzr522 <rayzr522@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "minify": "cat raw.js | tr -d '\n' | sed 's/ \\{1,\\}/ /g' | sed 's/ \\././g' | sed 's/( (/((/g' | sed 's/) )/))/g' > index.js",
+    "start": "yarn run minify && node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^11.1.0"
+  }
+}
