@@ -8,7 +8,7 @@
                 (
                     command === 'help' &&
                     message.delete() &&
-                    message.author.send('**Commands:**\n`--ping` - Pings the bot\n`--info` - Shows info about your account\n`--eval` - Evaluates some JavaScript code'.replace(/--/g, config.prefix))
+                    message.author.send('**Commands:**\n`--ping` - Pings the bot\n`--info` - Shows info about your account\n`--eval` - Evaluates some JavaScript code\n`--purge` - Purges messages'.replace(/--/g, config.prefix))
                         .then(() => message.channel.send(':mailbox_with_mail: Sent you a DM with my commands.').then(m => m.delete(5000)))
                 )
                 ||
@@ -37,6 +37,23 @@
                         message.channel.send(':x: Please provide some code to eval!') && false
                     ) &&
                     message.channel.send(`\`\`\`xl\n${require('util').inspect(eval(args.join(' '))).substr(0, 1500)}\n\`\`\``)
+                )
+                ||
+                (
+                    command === 'purge' &&
+                    (message.member.hasPermission('MANAGE_MESSAGES') ||
+                        message.channel.send(':x: You do not have permission to do that!') && false
+                    ) &&
+                    (!isNaN(args[0]) ||
+                        message.channel.send(':x: You must provide a number of messages to purge') && false
+                    ) &&
+                    (parseInt(args[0]) > 0 ||
+                        message.channel.send(':x: You must provide a number greater than zero') && false
+                    ) &&
+                    message.delete()
+                        .then(() => message.channel.bulkDelete(Math.min(parseInt(args[0]), 100))
+                            .then(() => message.channel.send(`Purged ${Math.min(parseInt(args[0]), 100)} messages. :flame:`)
+                                .then(m => m.delete(5000))))
                 )
             )(message.content.substr(config.prefix.length).split(' ')[0], message.content.substr(config.prefix.length).split(' ').slice(1))
         ).login(config.token)
