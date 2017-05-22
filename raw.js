@@ -4,11 +4,11 @@
         .on('message', message => message.content.startsWith(config.prefix)
             && !message.author.bot
             && message.guild
-            && ((command, args) =>
+            && ((command, args, store = {}) =>
                 (
                     command === 'help' &&
                     message.delete() &&
-                    message.author.send('**Commands:**\n\n`--help` - Shows this message\n`--info` - Shows info about the bot\n`--ping` - Pings the bot\n`--userinfo` - Shows info about your account\n`--eval` - Evaluates some JavaScript code\n`--purge` - Purges messages'.replace(/--/g, config.prefix))
+                    message.author.send('**Commands:**\n\n`--help` - Shows this message\n`--info` - Shows info about the bot\n`--ping` - Pings the bot\n`--userinfo [@user]` - Shows info about you or another user\n`--eval` - Evaluates some JavaScript code\n`--purge` - Purges messages'.replace(/--/g, config.prefix))
                         .then(() => message.channel.send(':mailbox_with_mail: Sent you a DM with my commands.').then(m => m.delete(5000)))
                 )
                 ||
@@ -30,12 +30,16 @@
                 ||
                 (
                     command === 'userinfo' &&
+                    (store.member = message.mentions.members.first() || message.member) &&
                     message.delete().then(() => message.channel.send({
                         embed: new RichEmbed()
-                            .addField('Name', message.author.tag)
-                            .addField('ID', message.author.id)
-                            .addField('Roles', message.member.roles.array().slice(1).sort((a, b) => b.position - a.position).map(role => role.name).join(', ') || 'None')
-                            .setThumbnail(message.author.avatarURL)
+                            .addField('Name', store.member.user.tag, true)
+                            .addField('Nickname', store.member.nickname || 'None', true)
+                            .addField('ID', store.member.user.id, true)
+                            .addField('Join Date', store.member.joinedAt.toLocaleString(), true)
+                            .addField('Roles', store.member.roles.array().slice(1).sort((a, b) => b.position - a.position).map(role => role.name).join(', ') || 'None')
+                            .setThumbnail(store.member.user.avatarURL)
+                            .setColor(store.member.displayColor)
                     }))
                 )
                 ||
@@ -58,8 +62,8 @@
                     (!isNaN(args[0]) ||
                         message.channel.send(':x: You must provide a number of messages to purge') && false
                     ) &&
-                    (parseInt(args[0]) > 0 ||
-                        message.channel.send(':x: You must provide a number greater than zero') && false
+                    (parseInt(args[0]) > 1 ||
+                        message.channel.send(':x: You must provide a number greater than 1') && false
                     ) &&
                     message.delete()
                         .then(() => message.channel.bulkDelete(Math.min(parseInt(args[0]), 100))
