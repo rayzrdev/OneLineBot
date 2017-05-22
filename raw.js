@@ -1,6 +1,6 @@
 (
     (bot, config, RichEmbed) => bot
-        .on('ready', () => bot.user.setGame(config.prefix + 'help') && bot.generateInvite(['MANAGE_MESSAGES']).then(console.log))
+        .on('ready', () => bot.user.setAvatar('./avatar.png').catch(() => { }) && bot.user.setGame(config.prefix + 'help') && bot.generateInvite(['MANAGE_MESSAGES']).then(console.log))
         .on('message', message => message.content.startsWith(config.prefix)
             && !message.author.bot
             && message.guild
