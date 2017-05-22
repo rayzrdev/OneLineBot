@@ -8,8 +8,19 @@
                 (
                     command === 'help' &&
                     message.delete() &&
-                    message.author.send('**Commands:**\n`--ping` - Pings the bot\n`--info` - Shows info about your account\n`--eval` - Evaluates some JavaScript code\n`--purge` - Purges messages'.replace(/--/g, config.prefix))
+                    message.author.send('**Commands:**\n\n`--help` - Shows this message\n`--info` - Shows info about the bot\n`--ping` - Pings the bot\n`--userinfo` - Shows info about your account\n`--eval` - Evaluates some JavaScript code\n`--purge` - Purges messages'.replace(/--/g, config.prefix))
                         .then(() => message.channel.send(':mailbox_with_mail: Sent you a DM with my commands.').then(m => m.delete(5000)))
+                )
+                ||
+                (
+                    command === 'info' &&
+                    message.delete() &&
+                    message.channel.send({
+                        embed: new RichEmbed()
+                            .setTitle('Hey!')
+                            .setDescription(`My name is OneLine Bot! I\'m a Discord bot written entirely in a single line of code. :grin:\n\nFor a list of my commands, do \`${config.prefix}help\`.\n\n[GitHub](https://github.com/Rayzr522/OneLineBot) | [The line of code](https://github.com/Rayzr522/OneLineBot/blob/master/index.js)`)
+                            .setThumbnail(bot.user.avatarURL)
+                    }).then(m => m.delete(60000))
                 )
                 ||
                 (
@@ -18,7 +29,7 @@
                         .then(m => m.edit(`Pong! \`${m.createdTimestamp - message.createdTimestamp}ms\``)))
                 ||
                 (
-                    command === 'info' &&
+                    command === 'userinfo' &&
                     message.delete().then(() => message.channel.send({
                         embed: new RichEmbed()
                             .addField('Name', message.author.tag)
