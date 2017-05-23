@@ -9,7 +9,8 @@
   "scripts": {
     "minify": "cat raw.js | tr -d '\n' | sed 's/ \\{1,\\}/ /g' | sed 's/ \\././g' | sed 's/( (/((/g' | sed 's/) )/))/g' > index.js",
     "start": "yarn run minify && node index.js",
-    "dev": "nodemon --watch raw.js --exec 'yarn start'"
+    "dev": "nodemon --watch raw.js --exec 'yarn start'",
+    "background": "screen -dmS onelineBot yarn start"
   },
   "dependencies": {
     "discord.js": "^11.1.0"
