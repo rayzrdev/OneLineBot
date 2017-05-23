@@ -1,5 +1,5 @@
 (
-    (bot, config, RichEmbed) => bot
+    (bot, config, RichEmbed, methods) => bot
         .on('ready', () => bot.user.setAvatar('./avatar.png').catch(() => { }) && bot.user.setGame(config.prefix + 'help') && bot.generateInvite(['MANAGE_MESSAGES']).then(console.log))
         .on('message', message => message.content.startsWith(config.prefix)
             && !message.author.bot
@@ -8,8 +8,13 @@
                 (
                     command === 'help' &&
                     message.delete() &&
-                    message.author.send('**Commands:**\n\n`--help` - Shows this message\n`--info` - Shows info about the bot\n`--ping` - Pings the bot\n`--userinfo [@user]` - Shows info about you or another user\n`--eval` - Evaluates some JavaScript code\n`--purge` - Purges messages'.replace(/--/g, config.prefix))
-                        .then(() => message.channel.send(':mailbox_with_mail: Sent you a DM with my commands.').then(m => m.delete(5000)))
+                    message.author.send({
+                        embed: new RichEmbed()
+                            .addField(':book: Info', '`--help` - Shows this message\n`--info` - Shows info about the bot\n`--ping` - Pings the bot\n`--userinfo [@user]` - Shows info about you or another user'.replace(/--/g, config.prefix))
+                            .addField(':tada: Fun', '`--cat` - Sends a random cat picture'.replace(/--/g, config.prefix))
+                            .addField(':shield: Moderation', '`--purge` - Purges messages'.replace(/--/g, config.prefix))
+                            .addField(':wrench: Utility', '`--eval` - Evaluates some JavaScript code'.replace(/--/g, config.prefix))
+                    }).then(() => message.channel.send(':mailbox_with_mail: Sent you a DM with my commands.').then(m => m.delete(5000)))
                 )
                 ||
                 (
@@ -26,7 +31,7 @@
                 (
                     command === 'ping' &&
                     message.channel.send('Pong!')
-                        .then(m => m.edit(`Pong! \`${m.createdTimestamp - message.createdTimestamp}ms\``)))
+                        .then(m => m.edit(`Pong! \`${m.createdTimestamp - message.createdTimestamp}ms\``) && m.delete(15000)))
                 ||
                 (
                     command === 'userinfo' &&
@@ -70,8 +75,27 @@
                             .then(() => message.channel.send(`Purged ${Math.min(parseInt(args[0]), 100)} messages. :flame:`)
                                 .then(m => m.delete(5000))))
                 )
+                ||
+                (
+                    command === 'cat' &&
+                    methods.get('http://random.cat/meow').then(res => message.channel.send({ file: JSON.parse(res).file })) &&
+                    message.delete()
+                )
             )(message.content.substr(config.prefix.length).split(' ')[0], message.content.substr(config.prefix.length).split(' ').slice(1))
         ).login(config.token)
-)(new (require('discord.js')).Client(), require('./config'), require('discord.js').RichEmbed) && (
+)(new (require('discord.js')).Client(), require('./config'), require('discord.js').RichEmbed, {
+    get: input => new Promise((resolve, reject) =>
+        require(
+            require('url').parse(input).protocol.replace(/:/g, '')
+        ).get(
+            require('url').parse(input), res =>
+                (buffer =>
+                    res.on('data', chunk => buffer = Buffer.concat([buffer, chunk]))
+                        .on('end', () => resolve(buffer.toString()))
+                        .on('error', err => reject(err))
+                )(Buffer.alloc(0))
+            )
+    )
+}) && (
     () => process.on('unhandledRejection', console.error).on('uncaughtException', console.error)
 )();
