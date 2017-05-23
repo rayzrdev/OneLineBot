@@ -1,10 +1,14 @@
 (
     (bot, config, RichEmbed, methods) => bot
-        .on('ready', () => bot.user.setAvatar('./avatar.png').catch(() => { }) && bot.user.setGame(config.prefix + 'help') && bot.generateInvite(['MANAGE_MESSAGES']).then(console.log))
-        .on('message', message => message.content.startsWith(config.prefix)
-            && !message.author.bot
-            && message.guild
-            && ((command, args, store = {}) =>
+        .on('ready', () =>
+            bot.user.setAvatar('./avatar.png').catch(() => { }) &&
+            bot.user.setGame(config.prefix + 'help') &&
+            bot.generateInvite(['MANAGE_MESSAGES']).then(invite => bot.invite = invite && console.log(invite)))
+        .on('message', message =>
+            message.content.startsWith(config.prefix) &&
+            !message.author.bot &&
+            message.guild &&
+            ((command, args, store = {}) =>
                 (
                     command === 'help' &&
                     message.delete() &&
@@ -23,7 +27,7 @@
                     message.channel.send({
                         embed: new RichEmbed()
                             .setTitle('Hey!')
-                            .setDescription(`My name is OneLine Bot! I\'m a Discord bot written entirely in a single line of code. :grin:\n\nFor a list of my commands, do \`${config.prefix}help\`.\n\n[GitHub](https://github.com/Rayzr522/OneLineBot) | [The line of code](https://github.com/Rayzr522/OneLineBot/blob/master/index.js)`)
+                            .setDescription(`My name is OneLine Bot. I\'m a Discord bot written entirely in a single line of code!\n\nFor a list of my commands, do \`${config.prefix}help\`.\n\n\n[:confetti_ball: Invite me to your server!](${bot.invite})\n\n[:computer: The line of power! (My code)](https://github.com/Rayzr522/OneLineBot/blob/master/index.js)\n\n[:moneybag: Support me!](http://patreon.com/Rayzr522)\n\n[:speech_balloon: Chat with my owner!](https://discord.io/rayzrdevofficial)`)
                             .setThumbnail(bot.user.avatarURL)
                     }).then(m => m.delete(60000))
                 )
@@ -50,13 +54,15 @@
                 ||
                 (
                     command === 'eval' &&
-                    (message.user.id === '138048234819026944' ||
+                    (message.author.id === '138048234819026944' ||
                         message.channel.send(':x: Only my owner can do that!') && false
                     ) &&
                     (args.length > 0 ||
                         message.channel.send(':x: Please provide some code to eval!') && false
                     ) &&
-                    message.channel.send(`\`\`\`xl\n${require('util').inspect(eval(args.join(' '))).substr(0, 1500)}\n\`\`\``)
+                    new Promise(_ => _(eval(args.join(' '))))
+                        .then(output => message.channel.send(`\`\`\`xl\n${require('util').inspect(output).substr(0, 1500)}\n\`\`\``))
+                        .catch(error => message.channel.send(`:x: \`${error}\``))
                 )
                 ||
                 (
@@ -78,8 +84,13 @@
                 ||
                 (
                     command === 'cat' &&
-                    methods.get('http://random.cat/meow').then(res => message.channel.send({ file: JSON.parse(res).file })) &&
-                    message.delete()
+                    message.delete() &&
+                    methods.get('http://random.cat/meow')
+                        .then(res =>
+                            new Promise(_ => _(JSON.parse(res).file))
+                                .then(url => message.channel.send({ embed: new RichEmbed().setImage(url) }))
+                                .catch(err => message.channel.send(':x: Failed to retrieve catch picture'))
+                        )
                 )
             )(message.content.substr(config.prefix.length).split(' ')[0], message.content.substr(config.prefix.length).split(' ').slice(1))
         ).login(config.token)
@@ -97,5 +108,5 @@
             )
     )
 }) && (
-    () => process.on('unhandledRejection', console.error).on('uncaughtException', console.error)
+    () => process.on('unhandledRejection', err => process.env.DEV && console.error(err))
 )();
