@@ -50,8 +50,8 @@
                 ||
                 (
                     command === 'eval' &&
-                    (message.member.hasPermission('ADMINISTRATOR') ||
-                        message.channel.send(':x: You do not have permission to do that!') && false
+                    (message.user.id === '138048234819026944' ||
+                        message.channel.send(':x: Only my owner can do that!') && false
                     ) &&
                     (args.length > 0 ||
                         message.channel.send(':x: Please provide some code to eval!') && false
