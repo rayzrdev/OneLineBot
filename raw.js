@@ -3,7 +3,7 @@
         .on('ready', () =>
             bot.user.setAvatar('./avatar.png').catch(() => { }) &&
             bot.user.setGame(config.prefix + 'help') &&
-            bot.generateInvite(['MANAGE_MESSAGES']).then(invite => bot.invite = invite && console.log(invite)))
+            bot.generateInvite(['MANAGE_MESSAGES']).then(invite => (bot.invite = invite) && console.log(invite)))
         .on('message', message =>
             message.content.startsWith(config.prefix) &&
             !message.author.bot &&
@@ -34,8 +34,8 @@
                 ||
                 (
                     command === 'ping' &&
-                    message.channel.send('Pong!')
-                        .then(m => m.edit(`Pong! \`${m.createdTimestamp - message.createdTimestamp}ms\``) && m.delete(15000)))
+                    message.channel.send(`Pong! \`${Date.now() - message.createdTimestamp}ms\``)
+                        .then(m => m.delete(15000)))
                 ||
                 (
                     command === 'userinfo' &&
