@@ -7,15 +7,17 @@
   "author": "Rayzr522 <rayzr522@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "minify": "cat raw.js | tr -d '\n' | sed 's/ \\{1,\\}/ /g' | sed 's/ \\././g' | sed 's/( (/((/g' | sed 's/) )/))/g' > index.js",
+    "minify": "cat raw.js | tr -d '\n' | sed 's/ \\{1,\\}/ /g' | sed 's/ \\././g' | sed 's/( (/((/g' | sed 's/) )/))/g' | head -c -1 > index.js",
     "start": "yarn run minify && node index.js",
     "dev": "nodemon --watch raw.js --exec 'yarn start'",
-    "background": "screen -dmS onelineBot yarn start"
+    "background": "screen -dmS onelineBot yarn start",
+    "precommit": "yarn run minify && git add index.js"
   },
   "dependencies": {
     "discord.js": "^11.1.0"
   },
   "devDependencies": {
+    "husky": "^0.14.3",
     "nodemon": "^1.11.0"
   }
 }
