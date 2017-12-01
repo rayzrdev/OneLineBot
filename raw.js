@@ -2,7 +2,8 @@
     (bot, config, RichEmbed, methods) => bot
         .on('ready', () =>
             bot.user.setAvatar('./avatar.png').catch(() => { }) &&
-            bot.user.setGame(config.prefix + 'help') &&
+            methods.updateGame(bot, config) &&
+            bot.setInterval(() => methods.updateGame(bot, config), 120000 /* 2 minutes */) &&
             bot.generateInvite(['MANAGE_MESSAGES']).then(invite => (bot.invite = invite) && console.log(invite)))
         .on('message', message =>
             message.content.startsWith(config.prefix) &&
@@ -88,7 +89,7 @@
                     methods.get('http://random.cat/meow')
                         .then(res =>
                             new Promise(_ => _(JSON.parse(res).file))
-                                .then(url => message.channel.send({ embed: new RichEmbed().setImage(url) }))
+                                .then(url => message.channel.send({ embed: new RichEmbed().setImage(url).setFooter(`Requested by ${message.author.tag}`) }))
                                 .catch(err => message.channel.send(':x: Failed to retrieve catch picture'))
                         )
                 )
@@ -106,7 +107,13 @@
                         .on('error', err => reject(err))
                 )(Buffer.alloc(0))
             )
-    )
+    ),
+    updateGame: (bot, config) => bot.user.setPresence({
+        game: {
+            name: `${bot.users.size} users, ${config.prefix}help`,
+            type: 2
+        }
+    })
 }) && (
     () => process.on('unhandledRejection', err => process.env.DEV && console.error(err))
 )();
