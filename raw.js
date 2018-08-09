@@ -4,7 +4,7 @@
             bot.user.setAvatar('./avatar.png').catch(() => { }) &&
             methods.updateGame(bot, config) &&
             bot.setInterval(() => methods.updateGame(bot, config), 120000 /* 2 minutes */) &&
-            bot.generateInvite(['MANAGE_MESSAGES']).then(invite => (bot.invite = invite) && console.log(invite)))
+            bot.generateInvite(['MANAGE_MESSAGES', 'KICK_MEMBERS', 'BAN_MEMBERS']).then(invite => (bot.invite = invite) && console.log(invite)))
         .on('message', message =>
             message.content.startsWith(config.prefix) &&
             !message.author.bot &&
@@ -17,7 +17,7 @@
                         embed: new RichEmbed()
                             .addField(':book: Info', '`--help` - Shows this message\n`--info` - Shows info about the bot\n`--ping` - Pings the bot\n`--userinfo [@user]` - Shows info about you or another user'.replace(/--/g, config.prefix))
                             .addField(':tada: Fun', '`--cat` - Sends a random cat picture'.replace(/--/g, config.prefix))
-                            .addField(':shield: Moderation', '`--purge` - Purges messages'.replace(/--/g, config.prefix))
+                            .addField(':shield: Moderation', '`--purge` - Purges messages\n`--kick <user> [reason]` - Kicks a user for an optional reason\n`--ban <user> [reason]` - Bans a user for an optional reason'.replace(/--/g, config.prefix))
                             .addField(':wrench: Utility', '`--eval` - Evaluates some JavaScript code'.replace(/--/g, config.prefix))
                     }).then(() => message.channel.send(':mailbox_with_mail: Sent you a DM with my commands.').then(m => m.delete(5000)))
                 )
@@ -84,6 +84,36 @@
                 )
                 ||
                 (
+                    command === 'kick' &&
+                    (message.member.hasPermission('KICK_MEMBERS') ||
+                        message.channel.send(':x: You do not have permission to do that!') && false
+                    ) &&
+                    (message.mentions.members.size > 0 ||
+                        message.channel.send(':x: Please mention someone to kick.') && false
+                    ) &&
+                    message.mentions.members.first().send(
+                        `:boot: :boom: You have been kicked${args.length <= 1 ? '' : ` for: \`${args.slice(1).join(' ')}\``}.`
+                    ).catch(() => { }).then(() => message.mentions.members.first().kick().then(() => {
+                        message.channel.send(`:white_check_mark: Kicked \`${message.mentions.members.first().user.tag}\``)
+                    }))
+                )
+                ||
+                (
+                    command === 'ban' &&
+                    (message.member.hasPermission('BAN_MEMBERS') ||
+                        message.channel.send(':x: You do not have permission to do that!') && false
+                    ) &&
+                    (message.mentions.members.size > 0 ||
+                        message.channel.send(':x: Please mention someone to ban.') && false
+                    ) &&
+                    message.mentions.members.first().send(
+                        `:hammer: :boom: You have been banned${args.length <= 1 ? '' : ` for: \`${args.slice(1).join(' ')}\``}.`
+                    ).catch(() => { }).then(() => message.mentions.members.first().ban().then(() => {
+                        message.channel.send(`:white_check_mark: Banned \`${message.mentions.members.first().user.tag}\``)
+                    }))
+                )
+                ||
+                (
                     command === 'cat' &&
                     message.delete() &&
                     methods.get('http://random.cat/meow')
@@ -106,7 +136,7 @@
                         .on('end', () => resolve(buffer.toString()))
                         .on('error', err => reject(err))
                 )(Buffer.alloc(0))
-            )
+        )
     ),
     updateGame: (bot, config) => bot.user.setPresence({
         game: {
