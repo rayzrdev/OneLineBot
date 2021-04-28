@@ -1,10 +1,10 @@
 (
-    (bot, config, RichEmbed, methods) => bot
+    (bot, config, MessageEmbed, methods) => bot
         .on('ready', () =>
             bot.user.setAvatar('./avatar.png').catch(() => { }) &&
             methods.updateGame(bot, config) &&
             bot.setInterval(() => methods.updateGame(bot, config), 120000 /* 2 minutes */) &&
-            bot.generateInvite(['MANAGE_MESSAGES', 'KICK_MEMBERS', 'BAN_MEMBERS']).then(invite => (bot.invite = invite) && console.log(invite)))
+            bot.generateInvite({ permissions: ['MANAGE_MESSAGES', 'KICK_MEMBERS', 'BAN_MEMBERS'] }).then(invite => (bot.invite = invite) && console.log(invite)))
         .on('message', message =>
             message.content.startsWith(config.prefix) &&
             !message.author.bot &&
@@ -14,7 +14,7 @@
                     command === 'help' &&
                     message.delete() &&
                     message.author.send({
-                        embed: new RichEmbed()
+                        embed: new MessageEmbed()
                             .addField(':book: Info', '`--help` - Shows this message\n`--info` - Shows info about the bot\n`--ping` - Pings the bot\n`--userinfo [@user]` - Shows info about you or another user'.replace(/--/g, config.prefix))
                             .addField(':tada: Fun', '`--cat` - Sends a random cat picture'.replace(/--/g, config.prefix))
                             .addField(':shield: Moderation', '`--purge` - Purges messages\n`--kick <user> [reason]` - Kicks a user for an optional reason\n`--ban <user> [reason]` - Bans a user for an optional reason'.replace(/--/g, config.prefix))
@@ -26,7 +26,7 @@
                     command === 'info' &&
                     message.delete() &&
                     message.channel.send({
-                        embed: new RichEmbed()
+                        embed: new MessageEmbed()
                             .setTitle('Hey!')
                             .setDescription(`My name is OneLine Bot. I\'m a Discord bot written entirely in a single line of code!\n\nFor a list of my commands, do \`${config.prefix}help\`.\n\n\n[:confetti_ball: Invite me to your server!](${bot.invite})\n\n[:computer: The line of power! (My code)](https://github.com/RayzrDev/OneLineBot/blob/master/index.js)\n\n[:moneybag: Support me!](http://patreon.com/Rayzr522)\n\n[:speech_balloon: Chat with my owner!](https://discord.io/rayzrdevofficial)`)
                             .setThumbnail(bot.user.avatarURL)
@@ -41,16 +41,28 @@
                 (
                     command === 'userinfo' &&
                     (store.member = message.mentions.members.first() || message.member) &&
-                    message.delete().then(() => message.channel.send({
-                        embed: new RichEmbed()
+                    message.channel.send({
+                        embed: new MessageEmbed()
                             .addField('Name', store.member.user.tag, true)
                             .addField('Nickname', store.member.nickname || 'None', true)
                             .addField('ID', store.member.user.id, true)
                             .addField('Join Date', store.member.joinedAt.toLocaleString(), true)
-                            .addField('Roles', store.member.roles.array().slice(1).sort((a, b) => b.position - a.position).map(role => role.name).join(', ') || 'None')
-                            .setThumbnail(store.member.user.avatarURL)
+                            .addField(
+                                'Roles',
+                                store.member.roles.cache.array()
+                                    // sort lowest to highest roles
+                                    .sort((a, b) => a.position - b.position)
+                                    // remove the first, which is always @everyone
+                                    .slice(1)
+                                    // reverse so highest are first
+                                    .reverse()
+                                    // map to name
+                                    .map(role => role.name)
+                                    .join(', ') || 'None'
+                            )
+                            .setThumbnail(store.member.user.avatarURL())
                             .setColor(store.member.displayColor)
-                    }))
+                    })
                 )
                 ||
                 (
@@ -68,7 +80,7 @@
                 ||
                 (
                     command === 'purge' &&
-                    (message.member.hasPermission('MANAGE_MESSAGES') ||
+                    (message.member.permissions.has('MANAGE_MESSAGES') ||
                         message.channel.send(':x: You do not have permission to do that!') && false
                     ) &&
                     (!isNaN(args[0]) ||
@@ -85,7 +97,7 @@
                 ||
                 (
                     command === 'kick' &&
-                    (message.member.hasPermission('KICK_MEMBERS') ||
+                    (message.member.permissions.has('KICK_MEMBERS') ||
                         message.channel.send(':x: You do not have permission to do that!') && false
                     ) &&
                     (message.mentions.members.size > 0 ||
@@ -100,7 +112,7 @@
                 ||
                 (
                     command === 'ban' &&
-                    (message.member.hasPermission('BAN_MEMBERS') ||
+                    (message.member.permissions.has('BAN_MEMBERS') ||
                         message.channel.send(':x: You do not have permission to do that!') && false
                     ) &&
                     (message.mentions.members.size > 0 ||
@@ -119,13 +131,13 @@
                     methods.get('http://random.cat/meow')
                         .then(res =>
                             new Promise(_ => _(JSON.parse(res).file))
-                                .then(url => message.channel.send({ embed: new RichEmbed().setImage(url).setFooter(`Requested by ${message.author.tag}`) }))
+                                .then(url => message.channel.send({ embed: new MessageEmbed().setImage(url).setFooter(`Requested by ${message.author.tag}`) }))
                                 .catch(err => message.channel.send(':x: Failed to retrieve catch picture'))
                         )
                 )
             )(message.content.substr(config.prefix.length).split(' ')[0], message.content.substr(config.prefix.length).split(' ').slice(1))
         ).login(config.token)
-)(new (require('discord.js')).Client(), require('./config'), require('discord.js').RichEmbed, {
+)(new (require('discord.js')).Client({ ws: { intents: new (require('discord.js')).Intents(['GUILDS', 'GUILD_MEMBERS', 'GUILD_MESSAGES']) } }), require('./config'), require('discord.js').MessageEmbed, {
     get: input => new Promise((resolve, reject) =>
         require(
             require('url').parse(input).protocol.replace(/:/g, '')

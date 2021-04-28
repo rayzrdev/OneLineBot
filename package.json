@@ -13,7 +13,7 @@
     "precommit": "npm run minify && git add index.js"
   },
   "dependencies": {
-    "discord.js": "^11.1.0",
+    "discord.js": "^12.5.3",
     "terser": "^5.7.0"
   },
   "devDependencies": {
