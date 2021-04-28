@@ -28,7 +28,7 @@
                     message.channel.send({
                         embed: new RichEmbed()
                             .setTitle('Hey!')
-                            .setDescription(`My name is OneLine Bot. I\'m a Discord bot written entirely in a single line of code!\n\nFor a list of my commands, do \`${config.prefix}help\`.\n\n\n[:confetti_ball: Invite me to your server!](${bot.invite})\n\n[:computer: The line of power! (My code)](https://github.com/Rayzr522/OneLineBot/blob/master/index.js)\n\n[:moneybag: Support me!](http://patreon.com/Rayzr522)\n\n[:speech_balloon: Chat with my owner!](https://discord.io/rayzrdevofficial)`)
+                            .setDescription(`My name is OneLine Bot. I\'m a Discord bot written entirely in a single line of code!\n\nFor a list of my commands, do \`${config.prefix}help\`.\n\n\n[:confetti_ball: Invite me to your server!](${bot.invite})\n\n[:computer: The line of power! (My code)](https://github.com/RayzrDev/OneLineBot/blob/master/index.js)\n\n[:moneybag: Support me!](http://patreon.com/Rayzr522)\n\n[:speech_balloon: Chat with my owner!](https://discord.io/rayzrdevofficial)`)
                             .setThumbnail(bot.user.avatarURL)
                     }).then(m => m.delete(60000))
                 )

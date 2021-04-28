@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "description": "A Discord bot in one very long line of code",
   "main": "index.js",
-  "repository": "https://github.com/Rayzr522/OneLineBot",
+  "repository": "https://github.com/RayzrDev/OneLineBot",
   "author": "Rayzr522 <rayzr522@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "minify": "cat raw.js | tr -d '\n' | sed 's/ \\{1,\\}/ /g' | sed 's/ \\././g' | sed 's/( (/((/g' | sed 's/) )/))/g' | head -c -1 > index.js",
-    "start": "yarn run minify && node index.js",
-    "dev": "nodemon --watch raw.js --exec 'yarn start'",
-    "background": "screen -dmS onelineBot yarn start",
-    "precommit": "yarn run minify && git add index.js"
+    "minify": "terser raw.js -o index.js",
+    "start": "npm run minify && node index.js",
+    "dev": "nodemon --watch raw.js --exec 'npm run start'",
+    "precommit": "npm run minify && git add index.js"
   },
   "dependencies": {
-    "discord.js": "^11.1.0"
+    "discord.js": "^11.1.0",
+    "terser": "^5.7.0"
   },
   "devDependencies": {
     "husky": "^0.14.3",
