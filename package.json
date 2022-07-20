@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "discord.js": "^12.5.3",
-    "terser": "^5.7.0"
+    "terser": "^5.14.2"
   },
   "devDependencies": {
     "husky": "^0.14.3",
